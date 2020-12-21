@@ -2,8 +2,6 @@
 
 import requests
 import datetime
-from __future__ import print_function
-import datetime
 import pickle
 import os.path
 from googleapiclient.discovery import build
@@ -68,19 +66,56 @@ prayer_times_today = {
 #Print to console the prayer times. Debug purposes. 
 print(prayer_times_today)
 
+#WHY DO I NEED TO DO SO MANY CONVERSIONS!!!!!
+#THIS NEEDS TO BE DONE CLEANER!!!!!
+timeobj_fajr = datetime.datetime.strptime(fajr_time, '%H:%M')
+timeobj_sunrise = datetime.datetime.strptime(sunrise_time, '%H:%M')
+timeobj_zuhr = datetime.datetime.strptime(zuhr_time, '%H:%M')
+timeobj_asr = datetime.datetime.strptime(asr_time, '%H:%M')
+timeobj_maghrib = datetime.datetime.strptime(maghrib_time, '%H:%M')
+timeobj_sunset = datetime.datetime.strptime(sunset_time, '%H:%M')
+timeobj_isha = datetime.datetime.strptime(isha_time, '%H:%M')
+
+full_fajr_time = datetime.datetime.combine(datetime.date.today(), timeobj_fajr.time())
+full_sunrise_time = datetime.datetime.combine(datetime.date.today(), timeobj_sunrise.time())
+full_zuhr_time = datetime.datetime.combine(datetime.date.today(), timeobj_zuhr.time())
+full_asr_time = datetime.datetime.combine(datetime.date.today(), timeobj_asr.time())
+full_isha_time = datetime.datetime.combine(datetime.date.today(), timeobj_isha.time())
+full_maghrib_time = datetime.datetime.combine(datetime.date.today(), timeobj_maghrib.time())
+full_sunset_time = datetime.datetime.combine(datetime.date.today(), timeobj_sunset.time())
+
+end_prayer_times = {
+  'Fajr' : full_fajr_time + datetime.timedelta(0,0,0,0,5),
+  'Sunrise' : full_sunrise_time + datetime.timedelta(0,0,0,0,5),
+  'Zuhr' : full_zuhr_time + datetime.timedelta(0,0,0,0,5),
+  'Asr' : full_asr_time + datetime.timedelta(0,0,0,0,5),
+  'Maghrib' : full_maghrib_time + datetime.timedelta(0,0,0,0,5),
+  'Sunset' : full_sunset_time + datetime.timedelta(0,0,0,0,5),
+  'Isha' : full_isha_time + datetime.timedelta(0,0,0,0,5)
+}
+
+full_prayer_times = {
+    'Fajr' : full_fajr_time,
+    'Sunrise' : full_sunrise_time,
+    'Zuhr' : full_zuhr_time,
+    'Asr' : full_asr_time,
+    'Maghrib' : full_maghrib_time,
+    'Sunset' : full_sunset_time,
+    'Isha' : full_isha_time
+}
+
 
 #Using Google Calendar API to add prayer times as an event and set reminder on event.
-
 event = {
   'summary': 'Prayer time',
   'location': 'Home',
-  'description': 'Prayer time',
+  'description': ' time',
   'start': {
-    'dateTime': '2015-05-28T09:00:00-07:00',
+    'dateTime': full_prayer_times['Fajr'],
     'timeZone': 'England/London',
   },
   'end': {
-    'dateTime': '2015-05-28T17:00:00-07:00',
+    'dateTime': end_prayer_times['Fajr'],
     'timeZone': 'England/London',
   },
   'reminders': {
@@ -88,9 +123,32 @@ event = {
     'overrides': [
       {'method': 'email', 'minutes': 1},
       {'method': 'popup', 'minutes': 1},
-    ],
-  },
-}
+      ],
+    },
+  }
 
+# for key in full_prayer_times:
+#  event = {
+#     'summary': key + 'Prayer time',
+#     'location': 'Home',
+#     'description': key + ' time',
+#     'start': {
+#       'dateTime': full_prayer_times[key],
+#       'timeZone': 'England/London',
+#     },
+#     'end': {
+#       'dateTime': end_prayer_times[key],
+#       'timeZone': 'England/London',
+#     },
+#     'reminders': {
+#       'useDefault': False,
+#       'overrides': [
+#         {'method': 'email', 'minutes': 1},
+#         {'method': 'popup', 'minutes': 1},
+#       ],
+#     },
+#   }
+  
 event = service.events().insert(calendarId='primary', body=event).execute()
+
 print('Event created: %s' % (event.get('htmlLink')))
