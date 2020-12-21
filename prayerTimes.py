@@ -65,5 +65,32 @@ prayer_times_today = {
     'Jummah (Friday only)' : '13:00'
 }
 
-#Print to console the prayer times
+#Print to console the prayer times. Debug purposes. 
 print(prayer_times_today)
+
+
+#Using Google Calendar API to add prayer times as an event and set reminder on event.
+
+event = {
+  'summary': 'Prayer time',
+  'location': 'Home',
+  'description': 'Prayer time',
+  'start': {
+    'dateTime': '2015-05-28T09:00:00-07:00',
+    'timeZone': 'England/London',
+  },
+  'end': {
+    'dateTime': '2015-05-28T17:00:00-07:00',
+    'timeZone': 'England/London',
+  },
+  'reminders': {
+    'useDefault': False,
+    'overrides': [
+      {'method': 'email', 'minutes': 1},
+      {'method': 'popup', 'minutes': 1},
+    ],
+  },
+}
+
+event = service.events().insert(calendarId='primary', body=event).execute()
+print('Event created: %s' % (event.get('htmlLink')))
